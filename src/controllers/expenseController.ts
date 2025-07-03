@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Expense from '../models/Expense';
 import { isPeriodClosed } from '../models/Period';
-import Income from '../models/Income';
+//import Income from '../models/Income';
 
 export const createExpense = async (
   req: Request & { file?: Express.Multer.File },
