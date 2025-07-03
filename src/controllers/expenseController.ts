@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import Expense from '../models/Expense';
 import { isPeriodClosed } from '../models/Period';
-//import Income from '../models/Income';
 
 export const createExpense = async (
   req: Request & { file?: Express.Multer.File },
@@ -122,10 +121,16 @@ export const createIncome = async (req: Request, res: Response): Promise<void> =
       res.status(400).json({ message: 'Missing required fields' });
       return;
     }
-    const income = new Income({
+    const period = date ? new Date(date).toISOString().slice(0, 7) : undefined;
+    if (period && await isPeriodClosed(period)) {
+      res.status(403).json({ message: 'This period is locked and cannot be edited.' });
+      return;
+    }
+    const income = new Expense({
       amount,
       description,
       date,
+      category: 'income',
       currency,
       managementDepartment,
       user: userId,
@@ -140,7 +145,7 @@ export const createIncome = async (req: Request, res: Response): Promise<void> =
 
 export const getIncome = async (req: Request, res: Response): Promise<void> => {
   try {
-    const income = await Income.find().populate('user');
+    const income = await Expense.find({ category: 'income' }).populate('user');
     res.json(income);
   } catch (error) {
     console.error('Error in getIncome:', error);
